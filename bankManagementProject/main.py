@@ -26,19 +26,31 @@ class Bank:
     except Exception as err:
         print(f"an exception occured as {err}")
 
-    @staticmethod
-    def update():
-        with open(Bank.dataBase, 'w') as fs:
+    @classmethod
+    def __update(cls):
+        with open(cls.dataBase, 'w') as fs:
             fs.write(json.dumps(Bank.data))
 
+    @classmethod
+    def __accountGenerate(cls):
+        alphabets = random.choices(string.ascii_letters, k=3)
+        num = random.choices(string.digits, k=3)
+        spchar = random.choices("!@#$%^&*",k=1)
 
-    def CreateAccount(self):
+        id = alphabets+num+spchar
+        random.shuffle(id)
+        return "".join(id)
+        
+
+
+
+    def createAccount(self):
         info = {
             "name" : input("Enter your name:- "),
             "age" : int(input("Enter your age:- ")),
             "email" : input("Enter your email:- "),
             "pin" : int(input("Enter your 4 digits pin:- ")),
-            "accountNumber" : 1234,
+            "accountNumber" : Bank.__accountGenerate(),
             "balance" : 0
         }
         if info['age'] < 18 or len(str(info['pin'])) != 4:
@@ -49,10 +61,24 @@ class Bank:
                 print(f"{i} : {info[i]}")
             print("Please note down your account number.")
             Bank.data.append(info)
-            Bank.update()
+            Bank.__update()
 
-    def DepositAccount(self):
-        pass
+    def depositMoney(self):
+        accNo = input("Enter your account number:- ")
+        pin = int(input("Enter your pin:- "))
+
+        userData = [i for i in Bank.data if i['accountNumber'] == accNo and i['pin'] == pin]
+        if userData == False:
+            print("Sorry no data found")
+        else:
+            amount = int(input("How much amount you wants to deposit "))
+            if amount > 10000 or amount < 0:
+                print("Amount is too much. Deposit less than 10,000 and above 0")
+            else:
+                userData[0]['balance'] += amount
+                Bank.__update()
+                print("Amount deposited successfully!")
+                
 
 
 user = Bank()
@@ -67,7 +93,7 @@ print(f"Press 6 for deleting the account. ")
 check = int(input("Tell your response : "))
 
 if check == 1:
-    user.CreateAccount()
+    user.createAccount()
 
 if check == 2:
-    user.DepositAccount()
+    user.depositMoney()
